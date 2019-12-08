@@ -1,44 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import ReactDOM from "react-dom";
 import { sample } from "lodash";
 
-const allParticipants = [
-  { name: "André", secretSanta: null },
-  { name: "Ana Filipa", secretSanta: null },
-  { name: "Ana Luísa", secretSanta: null },
-  { name: "Beatriz", secretSanta: null },
-  { name: "Claudia", secretSanta: null },
-  { name: "Coelho", secretSanta: null },
-  { name: "Daniel", secretSanta: null },
-  { name: "David Sêco", secretSanta: null },
-  { name: "Francisco", secretSanta: null },
-  { name: "Guilherme", secretSanta: null },
-  { name: "Hélder Barril", secretSanta: null },
-  { name: "Inês Barros", secretSanta: null },
-  { name: "Inês Henriques", secretSanta: null },
-  { name: "Joana Coelho", secretSanta: null },
-  { name: "João Sequeira", secretSanta: null },
-  { name: "Leonor", secretSanta: null },
-  { name: "Lili", secretSanta: null },
-  { name: "Luísito", secretSanta: null },
-  { name: "Mara", secretSanta: null },
-  { name: "Maria (filha Rita Carvalho)", secretSanta: null },
-  { name: "Mariana", secretSanta: null },
-  { name: "Mário", secretSanta: null },
-  { name: "Marta Simões", secretSanta: null },
-  { name: "Milton", secretSanta: null },
-  { name: "Ricardo", secretSanta: null },
-  { name: "Rita Carvalho", secretSanta: null },
-  { name: "Romeu", secretSanta: null },
-  { name: "Solange", secretSanta: null },
-  { name: "Teresa", secretSanta: null },
-  { name: "Vitor", secretSanta: null }
-];
-
 function App() {
-  const [participants, setParticipants] = useState(allParticipants.sort());
+  const [participants, setParticipants] = useState([]);
+  const [text, setText] = useState("");
+  const textRef = useRef();
 
-  const handleRaffleClick = () => {
+  const handleShuffleClick = () => {
     // eligble santas => all the participants that are not Santa yet
     let eligibleSantas = participants.filter(participant =>
       participants.every(p => p.secretSanta !== participant.name)
@@ -73,7 +42,7 @@ function App() {
     setParticipants(newParticipants);
   };
 
-  const handleClearAllClick = () => {
+  const handleResetAllClick = () => {
     const newParticipants = participants.map(participant => {
       return { ...participant, secretSanta: null };
     });
@@ -81,21 +50,61 @@ function App() {
     setParticipants(newParticipants);
   };
 
+  const handleNewParticipantClick = name => {
+    const newParticipants = [
+      ...participants,
+      { name, secretSanta: null }
+    ].sort();
+
+    setText("");
+    setParticipants(newParticipants);
+    textRef.current.focus();
+  };
+
+  const handleDeleteParticipantClick = name => {
+    const newParticipants = participants
+      .filter(participant => participant.name !== name)
+      .map(participant => {
+        return { ...participant, secretSanta: null };
+      });
+
+    setParticipants(newParticipants);
+  };
+
   return (
     <div className="App">
-      <button onClick={handleRaffleClick}>Raffle</button>
-      <button onClick={handleClearAllClick}>Clear All</button>
+      <div>
+        <button onClick={handleShuffleClick}>Shuffle</button>
+        <button onClick={handleResetAllClick}>Reset All</button>
+      </div>
+      <br />
+      <div>
+        <input
+          placeholder="name"
+          value={text}
+          onChange={e => setText(e.target.value)}
+          ref={textRef}
+        />
+        <button onClick={() => handleNewParticipantClick(text)}>Add</button>
+      </div>
       <ul>
         {participants.map(participant => (
           <li key={participant.name}>
             {participant.name}
             {participant.secretSanta ? ` -> ${participant.secretSanta}` : ""}
-            {participant.secretSanta && (
+            {participant.secretSanta ? (
               <button
                 name="reset"
                 onClick={() => handleResetClick(participant.name)}
               >
                 reset
+              </button>
+            ) : (
+              <button
+                name="reset"
+                onClick={() => handleDeleteParticipantClick(participant.name)}
+              >
+                remove
               </button>
             )}
           </li>
