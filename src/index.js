@@ -36,7 +36,7 @@ const allParticipants = [
 ];
 
 function App() {
-  const [participants, setParticipants] = useState(allParticipants);
+  const [participants, setParticipants] = useState(allParticipants.sort());
 
   const handleRaffleClick = () => {
     // eligble santas => all the participants that are not Santa yet
@@ -65,12 +65,10 @@ function App() {
   };
 
   const handleResetClick = name => {
-    const newParticipants = participants.map(participant => {
-      if (participant.name === name)
-        return { ...participant, secretSanta: null };
-
-      return participant;
-    });
+    const newParticipants = [
+      { name, secretSanta: null },
+      ...participants.filter(participant => participant.name !== name)
+    ];
 
     setParticipants(newParticipants);
   };
